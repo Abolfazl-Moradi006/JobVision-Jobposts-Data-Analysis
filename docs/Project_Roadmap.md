@@ -23,14 +23,17 @@ The final result should not be "a pile of charts". Each finding should end with 
 | Part | Topic | Number of tasks |
 |---|---|---|
 | A | Cleaning, feature building, first exploration (EDA) | 4 |
-| B | Modeling, trends and comparisons | 9 |
-| C | Clustering, skills network, advice for business owners | 3 + 2 bonus + 1 |
+| B | Time, location and industry analysis | 4 |
+| C | Salary modeling and what drives pay | 5 |
+| D | Clustering job titles and employers | 1 + 1 optional |
+
+The report must answer the questions **one by one, in this same order**.
 
 ---
 
 ## 2. What the data dictionary tells us
 
-Now that we have seen the dictionary, here are the facts that shape the whole plan.
+Here are the facts that shape the whole plan.
 
 ### 2.1 Key facts
 
@@ -61,7 +64,6 @@ Now that we have seen the dictionary, here are the facts that shape the whole pl
 | Province | `Jobpost_ProvinceEn` (32 values) |
 | Company size / age / ownership | `Company_SizeEn`, `Company_AgeFromEstablishmentYear`, `Company_CompanyOwnershipTypesEn` |
 | Benefits | `Jobpost_BenefitEn` (comma-separated) |
-| Remote work | `Jobpost_IsRemote` |
 | Salary shown or "negotiable" | `Jobpost_SalaryCanBeShown` |
 
 ### 2.3 What the data cannot tell us
@@ -92,17 +94,18 @@ jobvision-labor-market/
 │   ├── 01_missing_values.ipynb
 │   ├── 02_feature_engineering.ipynb
 │   ├── 03_income_per_hour.ipynb
-│   ├── 04_distributions_correlations.ipynb
-│   ├── 05_salary_modeling.ipynb
-│   ├── 06_time_series_seasonality.ipynb
-│   ├── 07_inflation_sector_dynamics.ipynb
-│   ├── 08_gender_education_age.ipynb
-│   ├── 09_geography.ipynb
-│   ├── 10_global_comparison.ipynb
-│   ├── 11_job_clustering.ipynb
-│   ├── 12_employer_clustering_bonus.ipynb
-│   ├── 13_skill_network_bonus.ipynb
-│   └── 14_business_recommendations.ipynb
+│   ├── 04_distributions_relationships.ipynb
+│   ├── 05_seasonality.ipynb
+│   ├── 06_wage_dynamics_inflation.ipynb
+│   ├── 07_geography.ipynb
+│   ├── 08_industry_job_sectors.ipynb
+│   ├── 09_salary_modeling.ipynb
+│   ├── 10_gender.ipynb
+│   ├── 11_sector_share_change.ipynb
+│   ├── 12_education_vs_experience.ipynb
+│   ├── 13_peak_income_age.ipynb
+│   ├── 14_job_clustering.ipynb
+│   └── 15_employer_clustering_optional.ipynb
 ├── src/                    # reusable code (parsers, cleaning, plots, date tools)
 ├── outputs/
 │   ├── figures/
@@ -127,7 +130,7 @@ jobvision-labor-market/
 
 **Goal:** have a clean working environment and understand every column.
 
-1. Create the environment with: pandas, numpy, scipy, statsmodels, scikit-learn, matplotlib, seaborn, plotly, networkx, kmodes, gower, jdatetime, pyarrow, arabic-reshaper, python-bidi, hazm (Persian text tools) and umap-learn.
+1. Create the environment with: pandas, numpy, scipy, statsmodels, scikit-learn, matplotlib, seaborn, plotly, kmodes, gower, jdatetime, pyarrow, arabic-reshaper, python-bidi, hazm (Persian text tools) and umap-learn.
 2. Write `download_data.py`, download the dataset, and save it as parquet.
 3. Check the shape. We expect **364,838 rows and 43 columns**.
 4. **Build our own data dictionary** (type, meaning, missing %, notes). Start from the provided one and add what we discover. This becomes an appendix in the report.
@@ -150,14 +153,15 @@ jobvision-labor-market/
 
 **What we do**
 
-- Count missing values and the percentage per column. Show them in a sorted bar chart and a missing-data map.
+- Count missing values and the percentage for **every column**, and report them in a table. Add a sorted bar chart to make it easy to read.
 - Split missing values into two kinds:
   - **Not applicable** (for example, no software skills needed), and
   - **Truly missing** (information the ad should have had).
-- Look at `Jobpost_SalaryCanBeShown`. Note that ads can be `False` (salary hidden) and also have empty salary values. Check how these two relate.
+- Since a big part of the project is about salary amounts, study **how often salary values actually appear**. Look at `Jobpost_SalaryCanBeShown`. Note that ads can be `False` (salary hidden) and also have empty salary values. Check how these two relate.
 - Test if hiding the salary is random:
   - Chi-square test plus **Cramér's V** against province, company size, job category, industry and period.
   - A **logistic regression** that predicts "salary hidden", with odds ratios and AUC.
+- **Find groups with almost no salary information.** For every group (job category, industry, province, company size), compute the number and share of ads with a shown salary. Report the groups where this is close to zero. These groups cannot be analyzed reliably later, so we list them and avoid strong claims about them.
 
 **What we conclude**
 
@@ -203,26 +207,62 @@ We also try a second convention (22 working days × daily hours) and compare, to
 
 1. Check the salary unit first (see section 2.1).
 2. Remove or flag impossible hours (below 5 or above about 100 per week). Report how many.
-3. Compare Income_Per_Hour across job categories, job titles (with a minimum number of ads), experience groups and education levels.
-4. **Full-time vs part-time vs project:** compare using a Mann-Whitney test and an effect size.
+3. **Plot and describe the distribution** of Income_Per_Hour (histogram, log scale, summary numbers).
+4. Compare Income_Per_Hour across job categories, job titles (with a minimum number of ads), experience groups and education levels.
+5. **Full-time vs part-time vs project:** compare using a Mann-Whitney test and an effect size. The question is simple: *do part-time or project jobs pay more per hour than full-time jobs?*
 
 **Important warning:** for part-time and project jobs, the salary column may mean "per project" or "per hour", not "per month". We read some real examples before comparing, and explain what we find.
 
-#### A4. Distributions and correlations
+#### A4. Distributions and relationships
 
-- Draw histograms and KDE plots for salary, hourly income, experience and age. Report **skewness and kurtosis**, on both normal and log scales.
-- Find outliers with the **IQR rule** and the **modified Z-score** (on log values). We **flag** outliers with a column instead of deleting them, and compare results with and without them.
-- Compute **Pearson and Spearman** correlations side by side. Where they disagree, the relationship is not a straight line.
-- Check **multicollinearity** with VIF. We expect min/max salary, min/max age and experience to be strongly related.
-- Show **diminishing returns** (salary vs experience, salary vs age) with binned averages and LOWESS curves.
+- Draw the distribution of the key variables: monthly salary, hourly income, required experience and age range. Report **skewness** (on normal and log scales) and analyze **outliers**.
+- Find outliers with the **IQR rule** (and optionally the modified Z-score on log values). We **flag** outliers with a column instead of deleting them, and compare results with and without them.
+- Show how variables relate to each other with **scatter plots, comparison charts (box plots by group)** and a **correlation matrix** of the numeric variables. We use Spearman next to Pearson when the data is skewed.
+- Check **multicollinearity** with VIF. We expect min/max salary, min/max age and min/max experience to be strongly related.
+- Show **non-linear relationships** (diminishing returns of experience or age on salary) with binned averages and a smoothed curve (LOWESS).
 
 **Output of Phase 1:** `01` to `04` notebooks, the cleaned dataset in `data/processed/`, the mapping tables, and the first set of figures.
 
 ---
 
-### Phase 2: Modeling and time analysis (Part B)
+### Phase 2: Time, location and industry analysis (Part B)
 
-#### B1. Salary models and what matters most
+#### B1. Seasonality (when do ads peak?)
+
+- Plot the number of ads per **month** and per **season**.
+- We only have month-level data over 25 months, so a few months appear twice (and March appears three times: 2022, 2023, 2024). We **compare the same month across years** instead of using a heavy seasonal model.
+- Is there a clear seasonal pattern? Find the peak months overall.
+- **Find which groups and industries peak when.** Repeat the monthly view for the biggest industries and job categories, and show it as a heatmap (month × industry).
+- Explain the jumps using the **Iranian work calendar** and how each economic activity works (for example the Nowruz slowdown, hiring after Nowruz, summer, autumn hiring, budget cycles, seasonal work in agriculture, construction or tourism). We call these **explanations that fit the timing**, not proven causes.
+
+#### B2. Wages vs inflation
+
+- Compute the monthly **mean and median** of offered salary and plot how they change over time.
+- Compare with inflation. Take the price index from an official source (Statistical Centre of Iran or the Central Bank of Iran) and cite it. We do not use numbers from memory.
+- Compute the **real wage** (nominal salary divided by the price index) to see if offered pay kept up.
+- Find job categories (and industries) whose offered salary **grew the most or fell the most** compared with the market average. Use a minimum number of ads per group.
+
+#### B3. Provinces
+
+- Count ads per province and show the distribution (bar chart and map-style table).
+- Say in which provinces ads are **most frequent and have the most reach**. Also compute each province's share of all ads.
+- **Is there a province with a very small share of ads?** List them.
+- If we can find population data (an official source, cited), add "ads per 100,000 people" to measure real reach, not just size.
+- **Note:** there are two province fields. `Jobpost_Province*` is where the job is, and `Company_Province*` is where the company is based. We use the job province, and also look at ads where the two differ.
+
+#### B4. Most popular job sectors in each industry
+
+- For each industry, build the share of each job category (cross-table, normalized by row). Show it as a heatmap.
+- Make a "top 3 job categories per industry" table.
+- Go one level deeper and list the most requested **job titles and specialties** in each industry (using the cleaned title text, with a minimum count).
+
+**Output of Phase 2:** notebooks `05` to `08`, the figures, and a short written conclusion per question.
+
+---
+
+### Phase 3: Salary modeling (Part C)
+
+#### C1. Salary models and what matters most
 
 - **Target:** `log(avg_salary)`, because salaries are skewed.
 - **Inputs:** job category, province, company size and age, ownership, education, experience, top skills, employment type, benefits, remote flag, hours.
@@ -230,119 +270,67 @@ We also try a second convention (22 working days × daily hours) and compare, to
   - Period 1: 2022-03 to 2023-02
   - Period 2: 2023-03 to 2024-02
   - 2024-03 is a single month, so we leave it out of the models or merge it with Period 2.
-- **Two model types:**
-  - **OLS regression** with standardized coefficients (easy to explain), with R² and robust standard errors.
-  - **Random Forest or Gradient Boosting** with permutation importance (captures non-linear effects).
-- Compare the importance of each factor between periods with a **slope chart**.
+- **Main model: OLS regression** with standardized coefficients (easy to explain), with R² and robust standard errors. We keep only variables with **significant coefficients** when we rank importance.
+- **Optional check:** a Random Forest or Gradient Boosting with permutation importance, to confirm the ranking and catch non-linear effects.
+- Rank the most powerful variables in each period and compare them with a **slope chart**: what changed between the periods?
+- **Check the signs.** For every important variable, say whether the sign of its coefficient matches what we expected (for example more experience → higher pay, larger company → higher pay) and explain any surprise.
 - Remember: models only see ads that show their salary (selection bias).
 
-#### B2. Seasonality (when do ads peak?)
-
-- Count ads per month and per season, and plot them.
-- We only have month-level data over 25 months, so a few months appear twice (and March appears three times: 2022, 2023, 2024). We **compare the same month across years** instead of using a heavy seasonal model.
-- Find the peak months overall and in the biggest job categories.
-- Explain the peaks with the Iranian calendar and economy (Nowruz slowdown, hiring after Nowruz, summer, autumn hiring, budget cycles, currency shocks). We call these **explanations that fit the timing**, not proven causes.
-
-#### B3. Wages vs inflation
-
-- Compute the monthly **mean and median** of offered salary.
-- Compare with inflation. Take the price index from an official source (Statistical Centre of Iran or the Central Bank of Iran) and cite it. We do not use numbers from memory.
-- Compute the **real wage** (nominal salary divided by the price index).
-- Find categories whose salaries grew faster or slower than the market average.
-
-#### B4. Gender
+#### C2. Gender
 
 - Test salary differences by preferred gender with **Welch's t-test**, plus **Mann-Whitney** as a backup. Report effect size (Cohen's d) and confidence intervals.
-- Show where gender preference is strongest across job categories and seniority levels with a heatmap.
+- Show **where the gap or preference is strongest** across job categories and seniority levels (experience groups) with a heatmap.
 - Run a regression that controls for category, experience and province.
 - **Be clear:** this shows what employers *ask for* and *offer*, not real pay gaps between workers.
 
-#### B5. Changing sector shares
+#### C3. Changing sector shares
 
 - Count ads and compute share (%) of each job category per period (or per quarter).
 - Show growth or decline in percentage points and in relative change. Use a slope or bump chart.
+- Name the sectors that are **growing** and the ones that are **shrinking**, with a minimum number of ads.
 
-#### B6. Education vs experience
+#### C4. Education vs experience
 
-- Measure the salary effect of degree level (controlling for experience) and of each year of experience (controlling for education).
-- Use regression with interaction terms.
-- Find categories where experience clearly matters more than degree (flat degree effect, strong experience effect).
+- Measure how much a higher degree changes the offered salary, controlling for experience.
+- Compare the money value of **a degree** with the money value of **a year of experience** (regression with interaction terms).
+- Find industries and job categories where **experience clearly replaces a degree** (a flat degree effect with a strong experience effect).
 
-#### B7. Age and peak income
+#### C5. Age and peak income
 
-- Use the middle of the requested age range (`MinAge`, `MaxAge`) as the age value.
-- Plot salary by age group and fit a **quadratic or spline** curve to find the peak.
-- Compare IT, manufacturing and finance.
+- Use the middle of the requested age range (`Jobpost_RequiredMinAge`, `Jobpost_RequiredMaxAge`) as the age value.
+- Plot salary by age group and fit a **quadratic or spline** curve to find the age where offered pay peaks.
+- Compare IT, manufacturing and finance. Is the peak age different?
 - **Warning:** many ads have no age limits, and ages are employer requirements, not worker ages.
 
-#### B8. Provinces
-
-- Count ads per province and compute Tehran's share over time.
-- Find provinces that grew faster than the national average (use a minimum number of ads).
-- Look for sudden jumps of a job category in a specific province using category × province share changes.
-- **Note:** there are two province fields. `Jobpost_Province*` is where the job is, and `Company_Province*` is where the company is based. We use the job province, and also look at ads where the two differ.
-- If we can find population data, add "ads per person".
-
-#### B9. Iran vs the world
-
-- Collect specific, cited findings from **Indeed Hiring Lab** and **LinkedIn Economic Graph** for 2022 to 2024 (post-COVID hiring surge, tech layoffs in 2023, stable remote work, growth in AI skills).
-- Build matching measures from our data: IT share of ads over time, `Jobpost_IsRemote` share over time, and AI-related skills (keyword search such as Python, machine learning, TensorFlow in software skills and titles).
-- Discuss similarities and differences, including Iranian factors (currency swings, sanctions, emigration of skilled workers).
-
-**Output of Phase 2:** notebooks `05` to `10`, all figures, and a short written conclusion per question.
+**Output of Phase 3:** notebooks `09` to `13`, all figures, and a short written conclusion per question.
 
 ---
 
-### Phase 3: Clustering, skills network and business advice (Part C)
+### Phase 4: Clustering (Part D)
 
-#### C1. Grouping job titles
+#### D1. Grouping job titles by skills and education
 
-1. Use `Jobpost_MainJobCategory` or a cleaned job title, and keep titles with at least N ads.
-2. Build one vector per title: TF-IDF of skills + education level + experience (scaled).
-3. Reduce dimensions (TruncatedSVD), then run **K-Means**. Pick k using the elbow method, silhouette score and Calinski-Harabasz. Also try **GMM** and choose with BIC.
-4. Name each cluster by its top skills and example titles. Plot with UMAP or PCA.
-5. Repeat for the two periods and compare with the **Adjusted Rand Index**. List titles that moved between clusters.
+1. Use a cleaned job title (or `Jobpost_MainJobCategory` when titles are too messy) and keep titles with at least N ads.
+2. Build a vector for every ad (or title): TF-IDF or 0/1 skills + required education level + experience (scaled).
+3. Reduce dimensions (TruncatedSVD), then run **K-Means**. Pick k using the elbow method, silhouette score and Calinski-Harabasz. Optionally compare with **GMM** using BIC.
+4. **Interpret the clusters:** name each one by its top skills, education level and example titles. Explain how the clusters **differ from each other**, and which job titles are close to each other and why.
+5. Plot the clusters with UMAP or PCA.
+6. Optional check: repeat the clustering for each period and see if titles moved between clusters.
 
-#### C2. Popular job categories in each industry
+#### D2. Employer profiles (optional)
 
-- Cross-table of industry × job category, normalized by row, shown as a heatmap, plus a "top 3 per industry" table.
-
-#### C3. Skill changes and fast-growing titles
-
-- For titles with enough ads, compare skill frequencies between periods. List skills gained and lost.
-- Find the titles with the biggest absolute jump and the biggest percentage growth. Use a **minimum ad count**, because small bases create fake huge percentages.
-
-#### C4. Employer profiles (bonus)
-
-- Features: company size, age, ownership, industry, province, salary-disclosure rate, number of benefits.
-- There is no company ID, so we cluster **ad rows** and call the result "employer types". Or we group by a combination of company traits to approximate employers, and explain the limit.
-- Use **K-Prototypes** (mixed data), or **Gower distance** on a random sample (a full 365K × 365K distance matrix is too big), and optionally DBSCAN.
+- Features: company size, company age, ownership type, industry, province, salary-disclosure rate, number of benefits.
+- There is no company ID, so we cluster **ad rows** and call the result "employer types".
+- Use **K-Prototypes** (made for mixed numbers and categories), or **Gower distance** on a random sample (a full 365K × 365K distance matrix is too big), and optionally DBSCAN.
 - Describe each cluster in simple words, for example "small private startups that hide salaries".
+- **Answer for JobVision:** how many employer types does JobVision face, and how should it plan its partnerships with them?
+- Give **a few marketing and sales ideas** for developing cooperation with some of these employer types. For example: a salary-transparency package for employers who hide salaries, a hiring bundle for fast-growing small companies, or an enterprise plan for large employers who post often.
 
-#### C5. Skill network (bonus)
-
-- Use `networkx`. **Node size** = how often the skill appears. **Edge width** = how often two skills appear together in the same ad.
-- Raw counts favor very common skills, so we also compute **PMI or lift** and keep only strong links.
-- Find communities with **Louvain**, and compute degree, betweenness and eigenvector centrality.
-- Make three versions: **all data**, **per period**, and **monthly** (as a small chart of how the top 10 skills' ranks change).
-
-#### C6. The playbook for a business owner
-
-Imagine the reader is a CEO of a growing startup or a mid-size trading/manufacturing company. They do not want statistics, only decisions. The playbook covers:
-
-- **Writing the ad:** what to include, which benefits are common, whether to show salary.
-- **Pay:** monthly and hourly ranges by role and province.
-- **Timing:** best months to post (and months with more competition).
-- **Requirements:** where degree can be relaxed, where experience matters, which skills add pay.
-- **One-page checklist:** "If I'm hiring X in province Y, do this."
-
-Each rule must come with a figure or number from our analysis, and an honest note that these are **market patterns**, not proven cause and effect.
-
-**Output of Phase 3:** notebooks `11` to `14` and the draft playbook.
+**Output of Phase 4:** notebooks `14` and `15`, cluster descriptions, and the employer-type recommendations.
 
 ---
 
-### Phase 4: Final deliverables
+### Phase 5: Final deliverables
 
 #### The report (PDF)
 
@@ -350,12 +338,12 @@ Structure:
 
 1. Title and short abstract
 2. Executive summary
-3. Data and cleaning steps
+3. Data and cleaning steps (step by step)
 4. Part A answers
 5. Part B answers
 6. Part C answers
-7. Business playbook
-8. Limitations
+7. Part D answers
+8. Overall strategic conclusion and limitations
 9. Appendix (data dictionary, mapping tables)
 
 Rules:
@@ -367,12 +355,12 @@ Rules:
 
 #### The presentation (15 minutes, about 12-15 slides)
 
-- Pick **4-5 headline findings** that tell one story, for example:
+- We do **not** need to follow the order of the questions. Pick **4-5 headline findings** that tell one story, for example:
   1. Many salaries are hidden, and not at random.
   2. The hourly-income view changes how we see jobs.
-  3. Seasonality and falling real wages.
-  4. Skill clusters and how skills connect.
-  5. Iran vs the global job market.
+  3. When companies hire (seasonality) and how real wages changed with inflation.
+  4. What really drives pay: experience, degree and location.
+  5. Employer types and what JobVision can do with them.
 - Flow: hook (the problem) → the data → insights → recommendations → closing.
 - One message per slide, big charts, little text.
 - We may add new analysis not in the brief (for example, "which skills add the biggest salary premium").
@@ -390,14 +378,14 @@ Rules:
 
 ---
 
-## 5. Timeline (about 4 weeks)
+## 5. Timeline (about 3 to 4 weeks)
 
 | Week | Focus |
 |---|---|
 | 1 | Phase 0 and 1: setup, cleaning, features, Income_Per_Hour, EDA |
-| 2 | Phase 2: models, seasonality, inflation, gender, education, age, provinces |
-| 3 | Phase 3 and global comparison: clustering, network, bonus tasks |
-| 4 | Business playbook, report, slides, README, full reproducibility test |
+| 2 | Phase 2 and 3: seasonality, inflation, provinces, industries, salary models, gender, education, age |
+| 3 | Phase 4: clustering (jobs and employers) and extra analysis for the presentation |
+| 4 (or the end of week 3) | Report, slides, README, full reproducibility test |
 
 ---
 
@@ -405,7 +393,7 @@ Rules:
 
 - **Wrong working-hours parsing.** All hourly-income results depend on it. Validate by hand.
 - **Wrong salary unit.** Confirm Toman vs Rial and monthly vs other, and check for typos.
-- **Forgetting the hidden-salary bias.** Mention it with every salary conclusion.
+- **Forgetting the hidden-salary bias.** Mention it with every salary conclusion, and be careful with groups that have almost no shown salaries.
 - **Treating patterns as causes.** We never say "X causes Y".
 - **Tiny groups.** Set minimum counts before reporting growth or averages.
 - **Too-strong time claims.** 25 months cannot prove long-term trends or formal seasonality.
@@ -413,6 +401,7 @@ Rules:
 - **Mixing calendars.** The data uses Gregorian months, and we explain Jalali months. Label charts clearly.
 - **Counting duplicates twice.** Check for repeated ads.
 - **Splitting JSON on commas.** Use a real JSON parser.
+- **Answering questions out of order in the report.** Follow the brief's order exactly (Part A, B, C, D).
 
 ---
 
@@ -422,8 +411,8 @@ Rules:
 2. Missing values and the salary-hiding test.
 3. Feature engineering (parsers in `src/`).
 4. Income_Per_Hour and EDA.
-5. Models and time-based analysis.
-6. Clustering and the skills network.
-7. Business playbook.
+5. Time, location and industry analysis.
+6. Salary models and the questions about gender, sectors, education and age.
+7. Clustering of job titles and employers.
 8. Report, slides and README, written **along the way**, not at the end.
 
