@@ -1,0 +1,3 @@
+- [abolfazl-moradi] setting up project structure and organize files
+- [abolfazl-moradi] write `data dictionary` for project dataset
+- [abolfazl-moradi] write `project roadmap` and organize issues
