@@ -1,3 +1,7 @@
 - [abolfazl-moradi] setting up project structure and organize files
 - [abolfazl-moradi] write `data dictionary` for project dataset
 - [abolfazl-moradi] write `project roadmap` and organize issues
+- [abolfazl-moradi] add `src/persian_text.py` (Persian text normalization and unique-count report)
+- [abolfazl-moradi] finish `00_data_inspection.ipynb`: load and check the data, normalize Persian text, add date and Jalali columns
+- [abolfazl-moradi] rename `Comany_CompanyOwnershipTypesFa` to `Company_CompanyOwnershipTypesFa`
+- [abolfazl-moradi] save the cleaned base file `data/interim/jobvision_base.parquet` (364,838 rows, 49 columns)
