@@ -93,8 +93,8 @@ Make sure you ran `pip install -e .` (section 4), then run `download_data.py` an
 | Step | Notebook | Needs | Produces |
 |---|---|---|---|
 | 0 | `download_data.py` | internet or CSV in `data/raw/` | `data/interim/jobposts_raw.parquet` |
-| 1 | `00_data_inspection` | raw parquet | data dictionary, first cleaned parquet |
-| 2 | `01_missing_values` | cleaned parquet | missing-value tables, salary-hiding tests |
+| 1 | `00_data_inspection` | raw parquet | `data/interim/jobvision_base.parquet`,dataset findings |
+| 2 | `01_missing_values` | `jobvision_base.parquet` | missing-value tables, salary-hiding tests |
 | 3 | `02_feature_engineering` | cleaned parquet | feature table, mapping dictionaries |
 | 4 | `03_income_per_hour` | feature table | `Income_Per_Hour` index |
 | 5 | `04_distributions_relationships` | feature table | distributions, outliers, correlations |
@@ -109,6 +109,9 @@ Make sure you ran `pip install -e .` (section 4), then run `download_data.py` an
 | 14 | `13_peak_income_age` | feature table | peak-pay age curves |
 | 15 | `14_job_clustering` | feature table | job-title clusters |
 | 16 | `15_employer_clustering_optional` | feature table | employer types |
+
+
+> `data/interim/` is ignored by git, so run `download_data.py` and then `00_data_inspection` to create `jobvision_base.parquet` before the other notebooks.
 
 *(Update the "Needs" and "Produces" columns as the notebooks are finished.)*
 
