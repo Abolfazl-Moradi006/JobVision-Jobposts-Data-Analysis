@@ -30,6 +30,7 @@ The raw data is **not** stored in this repository. See section 5 for how to get 
 JobVision-Jobposts-Data-Analysis/
 ├── README.md
 ├── requirements.txt
+├── pyproject.toml          # makes src/ importable in notebooks
 ├── download_data.py        # downloads the raw data and converts it to parquet
 ├── data/
 │   ├── raw/                # original CSV (ignored by git)
@@ -48,7 +49,6 @@ JobVision-Jobposts-Data-Analysis/
 ## 4. Environment setup
 
 **Python version:** `3.12`
-
 ```bash
 # 1. Clone the repository
 git clone https://github.com/Abolfazl-Moradi006/JobVision-Jobposts-Data-Analysis.git
@@ -60,9 +60,14 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 
 # 3. Install the exact library versions
 pip install -r requirements.txt
+
+# 4. Install the project code (makes `src/` importable from every notebook)
+pip install -e .
 ```
 
 Everyone must use the versions in `requirements.txt`. When you add a library, pin its version and update the file in your Pull Request.
+
+**Troubleshooting:** if a notebook shows `ModuleNotFoundError: No module named 'src'`, run `pip install -e .` from the project root in the same environment your Jupyter kernel uses, then restart the kernel.
 
 ## 5. How to download the data
 
@@ -83,7 +88,7 @@ It is safe to run twice: steps that are already done are skipped.
 
 ## 6. How to run the notebooks
 
-Run `download_data.py` first, then open the notebooks in order. Shared settings (paths, `RANDOM_STATE = 42`) come from `src/config.py`.
+Make sure you ran `pip install -e .` (section 4), then run `download_data.py` and open the notebooks in order. Shared settings (paths, `RANDOM_STATE = 42`) come from `src/config.py`.
 
 | Step | Notebook | Needs | Produces |
 |---|---|---|---|
