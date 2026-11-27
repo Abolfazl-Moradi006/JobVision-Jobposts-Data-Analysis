@@ -1,0 +1,22 @@
+﻿variable,group,ads,disclosed,rate,status
+Jobpost_MainJobCategory,قفل و کلیدساز,1,0,0.0,weak
+Jobpost_MainJobCategory,کفاش,4,1,25.0,weak
+Jobpost_MainJobCategory,تاریخ / جغرافیا / باستان شناسی,8,4,50.0,weak
+Jobpost_MainJobCategory,بافنده فرش (قالی باف),8,5,62.5,weak
+Jobpost_MainJobCategory,نانوا,23,11,47.8,weak
+Jobpost_MainJobCategory,قصاب,35,16,45.7,weak
+Jobpost_MainJobCategory,مهندسی انرژی / مهندسی هسته ای,71,20,28.2,weak
+Jobpost_MainJobCategory,قناد و شیرینی پز,53,21,39.6,weak
+Jobpost_MainJobCategory,طراحی بازی,65,27,41.5,weak
+Jobpost_IndustryEn,Shipping,116,48,41.4,low
+Jobpost_IndustryEn,Translation,163,49,30.1,low
+Jobpost_MainJobCategory,تخصص های ساختمانی (بنّا / گچ کار / کاشی کار و ...),71,31,43.7,low
+Jobpost_MainJobCategory,خبرنگار / روزنامه نگار,103,31,30.1,low
+Jobpost_MainJobCategory,ورزش / تربیت بدنی / تغذیه,124,42,33.9,low
+Jobpost_MainJobCategory,آرایشگر,279,48,17.2,low
+Jobpost_MainJobCategory,پرستار سالمند / پرستار کودک,83,49,59.0,low
+Jobpost_MainJobCategory,مهندسی نساجی,156,57,36.5,low
+Jobpost_MainJobCategory,نجار / MDF کار / کابینت کار / مبل ساز / رنگ کار چوب,133,65,48.9,low
+Jobpost_MainJobCategory,خیاط,199,68,34.2,low
+Jobpost_MainJobCategory,راهنمای تور / مهماندار,275,82,29.8,low
+Jobpost_MainJobCategory,طراحی لباس / طراحی طلا و جواهر,243,93,38.3,low
