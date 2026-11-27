@@ -93,8 +93,8 @@ Make sure you ran `pip install -e .` (section 4), then run `download_data.py` an
 | Step | Notebook | Needs | Produces |
 |---|---|---|---|
 | 0 | `download_data.py` | internet or CSV in `data/raw/` | `data/interim/jobposts_raw.parquet` |
-| 1 | `00_data_inspection` | raw parquet | `data/interim/jobvision_base.parquet`,dataset findings |
-| 2 | `01_missing_values` | `jobvision_base.parquet` | missing-value tables, salary-hiding tests |
+| 1 | `00_data_inspection` | raw parquet | `data/interim/jobvision_base.parquet`, dataset findings |
+| 2 | `01_missing_values` | `jobvision_base.parquet` | missing-value table, salary-hiding tests, `outputs/tables/weak_groups.csv`, disclosure-rate figures |
 | 3 | `02_feature_engineering` | cleaned parquet | feature table, mapping dictionaries |
 | 4 | `03_income_per_hour` | feature table | `Income_Per_Hour` index |
 | 5 | `04_distributions_relationships` | feature table | distributions, outliers, correlations |
@@ -119,7 +119,7 @@ Make sure you ran `pip install -e .` (section 4), then run `download_data.py` an
 
 *To be filled in when the analysis is finished.*
 
-- Part A: ...
+- Part A: Only 33.1% of ads (120,808 of 364,838) show a salary, and the rest hide it completely. Hiding is **not random**: it depends mainly on company size (disclosure falls from 43.5% for 11-50 employees to 16.6% for 1001-5000), then on job category and industry (banking 12.1% and telecom 13.6% hide most, healthcare 53.5% hides least). Salary results therefore describe only the ads that show their salary. Salaries are in millions of Toman per month.
 - Part B: ...
 - Part C: ...
 - Part D: ...
@@ -128,7 +128,8 @@ Make sure you ran `pip install -e .` (section 4), then run `download_data.py` an
 
 - **No hiring outcomes.** The data has no information about who was hired, how long hiring took, or how many people applied. We describe market practice, not what "works".
 - **Offered ranges, not actual pay.** Salaries are what employers advertise.
-- **Hidden salaries are not random.** Many ads hide their salary, so salary results describe only ads that show it.
+- **Hidden salaries are not random.** Only 33% of ads show a salary, and hiding is linked to company size, job category and industry. Large companies, banks, telecom firms and office or tech roles are under-represented in every salary result. We use this as a warning, and no salaries were imputed.
+- **Thin groups.** Some job categories have fewer than 30 shown salaries and are listed in `outputs/tables/weak_groups.csv`. Salary averages and rankings are not reported for them.
 - **Employer requirements, not worker facts.** Gender and age columns show what employers ask for, not who gets the job.
 - **Short period.** About 25 months is too short to claim long-term trends or formal seasonality.
 - **No company ID.** Employers cannot be grouped, so employer clustering is done on ad rows.

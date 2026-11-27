@@ -5,3 +5,9 @@
 - [abolfazl-moradi] finish `00_data_inspection.ipynb`: load and check the data, normalize Persian text, add date and Jalali columns
 - [abolfazl-moradi] rename `Comany_CompanyOwnershipTypesFa` to `Company_CompanyOwnershipTypesFa`
 - [abolfazl-moradi] save the cleaned base file `data/interim/jobvision_base.parquet` (364,838 rows, 49 columns)
+- [abolfazl-moradi] finish `01_missing_values.ipynb`: missing-value table, hidden-placeholder check (204 values in `Jobpost_CompanyWorkTimesDescription`), missing-type notes
+- [abolfazl-moradi] define `salary_disclosed` (salary flag is True and min and max both exist; 120,808 of 364,838 ads, 33.1%) and check the flag against the salary values (no conflicts)
+- [abolfazl-moradi] test whether salary hiding is random: disclosure rates, chi-square, Cramér's V and logistic regression (AUC 0.661); hiding depends mainly on company size, job category and industry
+- [abolfazl-moradi] list groups with almost no shown salaries (9 weak job categories, threshold < 30 shown salaries) and save `outputs/tables/weak_groups.csv`
+- [abolfazl-moradi] add disclosure-rate figures by company size and industry to `outputs/figures/`
+- [abolfazl-moradi] write the reusable salary-selection-bias warning for the report and presentation
